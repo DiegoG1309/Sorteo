@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gran Rifa Cheerleader</title>
+<style>
+:root{
+  --bg:#fdf6f2; --card:#ffffff; --ink:#2b1620; --sub:#7a5a63;
+  --red:#c8102e; --red-dark:#9c0c22; --gold:#ffcf3f; --gold-ink:#5a4200;
+  --avail:#fff6e0; --avail-bd:#ffcf3f; --taken:#c8102e; --taken-ink:#ffffff;
+  --line:#f0dede;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1c1216; --card:#2a1a20; --ink:#f5e9ec; --sub:#c7a3ad;
+    --avail:#3a2a1a; --avail-bd:#ffcf3f; --line:#3a2730;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1c1216; --card:#2a1a20; --ink:#f5e9ec; --sub:#c7a3ad;
+  --avail:#3a2a1a; --avail-bd:#ffcf3f; --line:#3a2730;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);}
+.wrap{max-width:900px;margin:0 auto;padding:16px 14px 40px;}
+h1{font-size:1.4rem;margin:6px 0 2px;text-align:center;color:var(--red);}
+.sub{text-align:center;color:var(--sub);font-size:.85rem;margin-bottom:14px;}
+.stats{display:flex;gap:10px;margin-bottom:16px;}
+.stat{flex:1;background:var(--card);border-radius:14px;padding:12px;text-align:center;
+  box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.stat b{display:block;font-size:1.6rem;}
+.stat.avail b{color:var(--red);}
+.stat.taken b{color:var(--gold-ink);}
+.stat span{font-size:.75rem;color:var(--sub);}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.toolbar input[type=text]{flex:1;min-width:120px;padding:9px 10px;border-radius:10px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:.9rem;}
+button{cursor:pointer;border:none;border-radius:10px;padding:9px 12px;font-size:.82rem;
+  font-weight:bold;background:var(--card);color:var(--ink);border:1px solid var(--line);}
+button.primary{background:var(--red);color:#fff;}
+.batch{background:var(--card);border-radius:14px;padding:10px 12px 12px;margin-bottom:10px;
+  box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.batch-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.batch-head b{font-size:.85rem;}
+.batch-head .count{font-size:.75rem;color:var(--sub);}
+.bar{height:6px;border-radius:4px;background:var(--line);overflow:hidden;margin-bottom:8px;}
+.bar i{display:block;height:100%;background:var(--red);}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(34px,1fr));gap:6px;}
+.num{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:.78rem;font-weight:bold;border:1.5px solid var(--avail-bd);background:var(--avail);
+  color:var(--ink);user-select:none;transition:transform .08s;}
+.num:active{transform:scale(.9);}
+.num.taken{background:var(--taken);color:var(--taken-ink);border-color:var(--red-dark);
+  text-decoration:line-through;opacity:.85;}
+.num.hl{outline:3px solid gold;}
+.footer{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+textarea{width:100%;min-height:70px;margin-top:8px;border-radius:10px;border:1px solid var(--line);
+  background:var(--card);color:var(--ink);padding:8px;font-size:.8rem;display:none;}
+.legend{display:flex;gap:14px;justify-content:center;margin:4px 0 14px;font-size:.75rem;color:var(--sub);}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.dot{width:12px;height:12px;border-radius:4px;display:inline-block;}
+.dot.a{background:var(--avail);border:1.5px solid var(--avail-bd);}
+.dot.t{background:var(--taken);}
+.draw{background:linear-gradient(135deg,var(--red),var(--red-dark));border-radius:16px;
+  padding:16px;text-align:center;color:#fff;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.2);}
+.draw h2{margin:0 0 4px;font-size:1.1rem;}
+.draw p{margin:0 0 10px;font-size:.78rem;opacity:.9;}
+.reveal{background:rgba(255,255,255,.12);border:2px dashed rgba(255,255,255,.5);border-radius:14px;
+  padding:18px 10px;font-size:2.4rem;font-weight:bold;margin-bottom:10px;min-height:1.4em;
+  display:flex;align-items:center;justify-content:center;letter-spacing:1px;}
+.reveal.winner{background:var(--gold);color:var(--red-dark);border-style:solid;border-color:#fff;
+  animation:pop .4s ease;}
+@keyframes pop{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+.draw button{background:#fff;color:var(--red);font-size:.9rem;padding:10px 18px;}
+.draw button:disabled{opacity:.6;}
+.num.winner{outline:3px solid var(--gold);box-shadow:0 0 0 4px rgba(255,207,63,.5);}
+.num.selecting{outline:3px solid #7a4fa3;box-shadow:0 0 0 3px rgba(122,79,163,.35);}
+.assignBar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.assignBar input{flex:1;min-width:140px;padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:.9rem;}
+.winnerName{font-size:1rem;font-weight:bold;min-height:1.3em;margin:-2px 0 8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎀 Gran Rifa Cheerleader</h1>
+  <div class="sub">Toca un número para marcarlo o liberarlo — todo se guarda solo en este dispositivo.</div>
+  <div class="legend">
+    <span><i class="dot a"></i>Disponible</span>
+    <span><i class="dot t"></i>Tomado</span>
+  </div>
+  <div class="stats">
+    <div class="stat avail"><b id="statAvail">-</b><span>Disponibles</span></div>
+    <div class="stat taken"><b id="statTaken">-</b><span>Tomados</span></div>
+  </div>
+  <div class="draw">
+    <h2>🏆 Sorteo en vivo del ganador</h2>
+    <p id="drawSub">Selecciona al azar entre los números tomados.</p>
+    <div class="reveal" id="reveal">?</div>
+    <div class="winnerName" id="winnerName"></div>
+    <button id="btnDraw">🎲 Girar el sorteo</button>
+  </div>
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="Buscar número...">
+    <button id="btnCopy">📋 Lista de tomados</button>
+    <button id="btnCopyAvail">📋 Lista de disponibles</button>
+    <button id="btnAssignMode">👤 Asignar cliente</button>
+    <button id="btnReset">↺ Reiniciar todo</button>
+  </div>
+  <div class="assignBar" id="assignBar" style="display:none;">
+    <input type="text" id="clientName" placeholder="Nombre del cliente">
+    <button id="btnLinkSelected" class="primary">Vincular a seleccionados (<span id="selCount">0</span>)</button>
+    <button id="btnCancelAssign">Cancelar</button>
+  </div>
+  <textarea id="out" readonly></textarea>
+  <div id="batches"></div>
+</div>
+<script>
+const TOTAL = 260, BATCH = 20;
+const seedTaken = [1,2,3,4,6,7,8,9,10,12,14,15,16,17,18,20,21,22,23,24,25,26,27,28,30,31,32,33,34,36,37,41,42,44,46,50,54,58,61,63,64,66,69,82,83,84,85,86,90,92,93,95,96,101,103,104,110,111,112,116,122,124,128,130,135,141,143,149,150,151,152,153,154,156,162,166,167,168,170,173,179,180,181,183,190,196,197,202,205,210,211,214,215,219,221,223,224,226,227,228,230,232,236,238,242,244,246,250,256];
+
+let state, names;
+try{
+  const saved = JSON.parse(localStorage.getItem('rifaCheerleaderData') || 'null');
+  if(saved && Array.isArray(saved.state) && saved.names){ state = saved.state; names = saved.names; }
+}catch(e){}
+if(!state){
+  let legacy = null;
+  try{ legacy = JSON.parse(localStorage.getItem('rifaCheerleaderState') || 'null'); }catch(e){}
+  if(legacy && Array.isArray(legacy) && legacy.length === TOTAL+1){ state = legacy; }
+  else{
+    state = new Array(TOTAL+1).fill(false);
+    seedTaken.forEach(n => state[n] = true);
+  }
+  names = {};
+}
+
+function save(){
+  try{ localStorage.setItem('rifaCheerleaderData', JSON.stringify({state, names})); }catch(e){}
+}
+
+function render(){
+  const batchesEl = document.getElementById('batches');
+  batchesEl.innerHTML = '';
+  let totalTaken = 0;
+  for(let b=0; b < TOTAL/BATCH; b++){
+    const start = b*BATCH+1, end = start+BATCH-1;
+    const div = document.createElement('div');
+    div.className = 'batch';
+    let takenInBatch = 0;
+    let gridHtml = '';
+    for(let n=start; n<=end; n++){
+      if(state[n]) takenInBatch++;
+      const nm = names[n] ? ` title="${names[n].replace(/"/g,'&quot;')}"` : '';
+      gridHtml += `<div class="num${state[n]?' taken':''}" data-n="${n}"${nm}>${n}</div>`;
+    }
+    totalTaken += takenInBatch;
+    const pct = Math.round(takenInBatch/BATCH*100);
+    div.innerHTML = `
+      <div class="batch-head">
+        <b>Lote ${start}–${end}</b>
+        <span class="count">${takenInBatch}/${BATCH} tomados · ${BATCH-takenInBatch} libres</span>
+      </div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="grid">${gridHtml}</div>`;
+    batchesEl.appendChild(div);
+  }
+  document.getElementById('statAvail').textContent = TOTAL - totalTaken;
+  document.getElementById('statTaken').textContent = totalTaken;
+}
+
+let assignMode = false;
+const selected = new Set();
+document.getElementById('batches').addEventListener('click', e=>{
+  const cell = e.target.closest('.num');
+  if(!cell) return;
+  const n = parseInt(cell.dataset.n,10);
+  if(assignMode){
+    if(selected.has(n)){ selected.delete(n); cell.classList.remove('selecting'); }
+    else{ selected.add(n); cell.classList.add('selecting'); }
+    document.getElementById('selCount').textContent = selected.size;
+    return;
+  }
+  state[n] = !state[n];
+  save();
+  render();
+});
+
+document.getElementById('btnAssignMode').addEventListener('click', ()=>{
+  assignMode = !assignMode;
+  document.getElementById('assignBar').style.display = assignMode ? 'flex' : 'none';
+  document.getElementById('btnAssignMode').textContent = assignMode ? '✅ Modo asignar activo' : '👤 Asignar cliente';
+  if(!assignMode){
+    selected.forEach(n=>{
+      const el = document.querySelector(`.num[data-n="${n}"]`);
+      if(el) el.classList.remove('selecting');
+    });
+    selected.clear();
+    document.getElementById('selCount').textContent = '0';
+  }
+});
+
+document.getElementById('btnCancelAssign').addEventListener('click', ()=>{
+  document.getElementById('btnAssignMode').click();
+});
+
+document.getElementById('btnLinkSelected').addEventListener('click', ()=>{
+  const name = document.getElementById('clientName').value.trim();
+  if(!name){ alert('Escribe el nombre del cliente.'); return; }
+  if(selected.size === 0){ alert('Selecciona al menos un número.'); return; }
+  selected.forEach(n=>{
+    state[n] = true;
+    names[n] = name;
+  });
+  save();
+  selected.clear();
+  document.getElementById('clientName').value = '';
+  document.getElementById('btnAssignMode').click();
+  render();
+});
+
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  if(confirm('¿Reiniciar el tablero? Esto liberará los 260 números.')){
+    state = new Array(TOTAL+1).fill(false);
+    save(); render();
+  }
+});
+
+document.getElementById('btnCopy').addEventListener('click', ()=>{
+  const taken = [];
+  for(let n=1;n<=TOTAL;n++) if(state[n]) taken.push(n);
+  const out = document.getElementById('out');
+  out.value = `Tomados (${taken.length}): ` + taken.map(n => names[n] ? `${n} (${names[n]})` : `${n}`).join(', ');
+  out.style.display = 'block';
+  out.focus(); out.select();
+});
+
+document.getElementById('btnCopyAvail').addEventListener('click', ()=>{
+  const avail = [];
+  for(let n=1;n<=TOTAL;n++) if(!state[n]) avail.push(n);
+  const out = document.getElementById('out');
+  out.value = `Disponibles (${avail.length}): ` + avail.join(', ');
+  out.style.display = 'block';
+  out.focus(); out.select();
+});
+
+document.getElementById('search').addEventListener('input', e=>{
+  document.querySelectorAll('.num.hl').forEach(el=>el.classList.remove('hl'));
+  const v = e.target.value.trim();
+  if(!v) return;
+  const el = document.querySelector(`.num[data-n="${v}"]`);
+  if(el){ el.classList.add('hl'); el.scrollIntoView({behavior:'smooth',block:'center'}); }
+});
+
+let drawing = false;
+document.getElementById('btnDraw').addEventListener('click', ()=>{
+  if(drawing) return;
+  const pool = [];
+  for(let n=1;n<=TOTAL;n++) if(state[n]) pool.push(n);
+  if(pool.length === 0){ alert('No hay números tomados todavía.'); return; }
+  document.querySelectorAll('.num.winner').forEach(el=>el.classList.remove('winner'));
+  const reveal = document.getElementById('reveal');
+  const btn = document.getElementById('btnDraw');
+  const winnerNameEl = document.getElementById('winnerName');
+  document.getElementById('drawSub').textContent = `Participan ${pool.length} números tomados.`;
+  drawing = true;
+  btn.disabled = true;
+  reveal.classList.remove('winner');
+  winnerNameEl.textContent = '';
+  const buf = new Uint32Array(1);
+  crypto.getRandomValues(buf);
+  const winner = pool[buf[0] % pool.length];
+  const SPIN_MS = 7000;
+  const startTime = Date.now();
+  let delay = 50;
+  function tick(){
+    reveal.textContent = pool[Math.floor(Math.random()*pool.length)];
+    delay = Math.min(delay + 10, 300);
+    const elapsed = Date.now() - startTime;
+    if(elapsed + delay < SPIN_MS){
+      setTimeout(tick, delay);
+    } else {
+      reveal.textContent = winner;
+      reveal.classList.add('winner');
+      winnerNameEl.textContent = names[winner] ? `🎉 ${names[winner]}` : 'Sin nombre asignado';
+      drawing = false;
+      btn.disabled = false;
+      setTimeout(()=>{
+        const tile = document.querySelector(`.num[data-n="${winner}"]`);
+        if(tile){ tile.classList.add('winner'); tile.scrollIntoView({behavior:'smooth',block:'center'}); }
+      }, 2000);
+    }
+  }
+  tick();
+});
+
+render();
+</script>
+</body>
+</html>
