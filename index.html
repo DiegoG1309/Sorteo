@@ -373,7 +373,7 @@ document.getElementById('btnDraw').addEventListener('click', ()=>{
   const buf = new Uint32Array(1);
   crypto.getRandomValues(buf);
   const winner = pool[buf[0] % pool.length];
-  const SPIN_MS = 7000;
+  const SPIN_MS = 15000;
   const startTime = Date.now();
   let delay = 50;
   function tick(){
@@ -391,7 +391,7 @@ document.getElementById('btnDraw').addEventListener('click', ()=>{
       setTimeout(()=>{
         const tile = document.querySelector(`.num[data-n="${winner}"]`);
         if(tile){ tile.classList.add('winner'); tile.scrollIntoView({behavior:'smooth',block:'center'}); }
-      }, 2000);
+      }, 5000);
     }
   }
   tick();
